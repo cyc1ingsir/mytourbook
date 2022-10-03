@@ -326,6 +326,14 @@ public class HAC4LinuxDeviceReader extends TourbookDevice {
          short modeId = 0;
 
          int friends = -1;
+
+         int tourYear = 0;
+         int tourMonth = 0;
+         int tourDay = 0;
+         int tourHour = 0;
+         int tourMinute = 0;
+         boolean dateParsed = false, timeParsed = false, startTimeSet = false;
+
          while ((line = fileHac4LinuxData.readLine()) != null) {
             if (line.length() <= 0 || line.charAt(0) == '#') {
                continue;
@@ -361,23 +369,22 @@ public class HAC4LinuxDeviceReader extends TourbookDevice {
                   tourData.setTourTitle(fields[1]);
                }
 
-               int tourYear = 0;
-               int tourMonth = 0;
-               int tourDay = 0;
-               int tourHour = 0;
-               int tourMinute = 0;
-
                if (fields[0].equals("Date")) {//"dd.MM.yyyy" //$NON-NLS-1$
                   tourDay = (Short.parseShort(fields[1].substring(0, 2)));
                   tourMonth = (Short.parseShort(fields[1].substring(3, 5)));
                   tourYear = (Short.parseShort(fields[1].substring(6)));
+                  dateParsed = true;
                }
                if (fields[0].equals("Time")) {//"hh:mm:ss.00" //$NON-NLS-1$
                   tourHour = (Short.parseShort(fields[1].substring(0, 2)));
                   tourMinute = (Short.parseShort(fields[1].substring(3, 5)));
+                  timeParsed = true;
                }
 
-               tourData.setTourStartTime(tourYear, tourMonth, tourDay, tourHour, tourMinute, 0);
+               if (dateParsed && timeParsed && !startTimeSet) {
+                  tourData.setTourStartTime(tourYear, tourMonth, tourDay, tourHour, tourMinute, 0);
+                  startTimeSet = true;
+               }
 
                if (fields[0].equals("Mode")) { //$NON-NLS-1$
                   modeId = Short.parseShort(fields[1]);
